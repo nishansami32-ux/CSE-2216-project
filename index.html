@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zzone Academy — Student Management</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap: 16px; padding: 14px 16px;">
+      <div class="brand" aria-label="Zzone Academy">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Zzone Academy</h1>
+          <div class="sub">Programming Language Learning — Student Management</div>
+        </div>
+      </div>
+      <div class="pill">Front-end </div>
+    </div>
+
+    <div class="container">
+      <div class="tabsbar" role="tablist" aria-label="Main sections">
+        <button class="tab" role="tab" id="tab-dashboard" aria-controls="panel-dashboard" aria-selected="true">Dashboard</button>
+        <button class="tab" role="tab" id="tab-students"  aria-controls="panel-students"  aria-selected="false">Students</button>
+        <button class="tab" role="tab" id="tab-courses"   aria-controls="panel-courses"   aria-selected="false">Courses</button>
+        <button class="tab" role="tab" id="tab-services"  aria-controls="panel-services"  aria-selected="false">Services</button>
+        <button class="tab" role="tab" id="tab-results"   aria-controls="panel-results"   aria-selected="false">Results</button>
+        <button class="tab" role="tab" id="tab-contact"   aria-controls="panel-contact"   aria-selected="false">Contact</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <!-- Dashboard -->
+    <section id="panel-dashboard" class="panel" role="tabpanel" aria-labelledby="tab-dashboard" aria-hidden="false">
+      <div class="cards" style="margin: 18px 0;">
+        <div class="card">
+          <h3>Total Students</h3>
+          <div class="kpi" id="kpi-total">0</div>
+          <div class="hint">All active students</div>
+        </div>
+        <div class="card">
+          <h3>Average Score</h3>
+          <div class="kpi" id="kpi-avg">–</div>
+          <div class="hint">Across last recorded results</div>
+        </div>
+        <div class="card">
+          <h3>Courses</h3>
+          <div class="kpi" id="kpi-courses">0</div>
+          <div class="hint">Active courses offered</div>
+        </div>
+      </div>
+
+      <div class="grid-12">
+        <div class="card span-8">
+          <h3>Recent Results</h3>
+          <div id="recent-results" style="display:grid; gap:14px; margin-top: 10px;"></div>
+        </div>
+        <div class="card span-4">
+          <h3>Quick Actions</h3>
+          <div style="display:grid; gap:10px; margin-top:8px;">
+            <button class="btn primary" onclick="switchTab('tab-students')">Add a Student</button>
+            <button class="btn" onclick="downloadJSON()">Export Students </button>
+            <button class="btn" onclick="clearAllData()">Reset  Data</button>
+            <div class="note">Exports your data as a .json file stored only in your browser.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Students -->
+    <section id="panel-students" class="panel" role="tabpanel" aria-labelledby="tab-students" aria-hidden="true">
+      <div style="margin: 18px 0; display:grid; grid-template-columns: repeat(12, 1fr); gap:16px;">
+        <div class="card" style="grid-column: span 4;">
+          <h3 id="form-title">Add Student</h3>
+          <form id="student-form" novalidate>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="name">Full Name</label>
+                <input id="name" name="name" type="text" required placeholder=/>
+              </div>
+              <div class="field">
+                <label for="studentId">Student ID</label>
+                <input id="studentId" name="studentId" type="text" required placeholder="" />
+              </div>
+              <div class="field">
+                <label for="section">Section</label>
+                <select id="section" name="section" required>
+                  <option value="">Choose…</option>
+                  <option>A</option>
+                  <option>B</option>
+                  <option>C</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label for="contact">Contact</label>
+                <input id="contact" name="contact" type="tel" required placeholder="e.g., 017xxxxxxxx" />
+              </div>
+              <div class="field full">
+                <label for="courses">Courses (hold Ctrl/Cmd to select multiple)</label>
+                <select id="courses" name="courses" multiple size="4"></select>
+              </div>
+              <div class="field">
+                <label for="score">Latest Score (0–100)</label>
+                <input id="score" name="score" type="number" min="0" max="100" step="1" placeholder="e.g., 88" />
+              </div>
+              <div class="field">
+                <label for="remarks">Remarks</label>
+                <input id="remarks" name="remarks" type="text" placeholder="Optional" />
+              </div>
+              <div class="field full actions">
+                <button class="btn primary" type="submit" id="btn-save">Save</button>
+                <button class="btn ghost" type="button" id="btn-cancel" style="display:none;">Cancel Edit</button>
+              </div>
+              <div class="note full" id="form-note">All required fields must be filled.</div>
+            </div>
+          </form>
+        </div>
+
+        <div class="card" style="grid-column: span 8;">
+          <div class="toolbar">
+            <div class="left">
+              <input id="search" type="text" placeholder="Search name, ID, section…" aria-label="Search students" />
+              <span class="note">Press Enter to clear</span>
+            </div>
+            <div class="right">
+              <button class="btn" onclick="downloadJSON()">Export</button>
+              <button class="btn warn" onclick="clearAllData()">Reset Demo</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="students-table">
+              <thead>
+                <tr>
+                  <th class="th-sort" data-key="name">Name ▲▼</th>
+                  <th class="th-sort" data-key="studentId">ID ▲▼</th>
+                  <th class="th-sort" data-key="section">Section ▲▼</th>
+                  <th>Contact</th>
+                  <th>Courses</th>
+                  <th class="th-sort" data-key="score">Score ▲▼</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody><!-- rows injected by JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Courses -->
+    <section id="panel-courses" class="panel" role="tabpanel" aria-labelledby="tab-courses" aria-hidden="true">
+      <div class="cards" style="margin: 18px 0;"><!-- Injected by JS --></div>
+    </section>
+
+    <!-- Services -->
+    <section id="panel-services" class="panel" role="tabpanel" aria-labelledby="tab-services" aria-hidden="true">
+      <div class="cards" style="margin: 18px 0;"><!-- Injected by JS --></div>
+    </section>
+
+    <!-- Results -->
+    <section id="panel-results" class="panel" role="tabpanel" aria-labelledby="tab-results" aria-hidden="true">
+      <div class="card" style="margin: 18px 0;">
+        <div class="toolbar">
+          <div class="left">
+            <label class="note" for="filter-section">Filter:</label>
+            <select id="filter-section">
+              <option value="">All Sections</option>
+              <option>Alpha</option>
+              <option>Beta</option>
+              <option>Gamma</option>
+            </select>
+          </div>
+          <div class="right">
+            <span class="pill" id="avg-pill">Average: —</span>
+          </div>
+        </div>
+        <div id="results-list" style="display:grid; gap: 14px;"></div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="panel-contact" class="panel" role="tabpanel" aria-labelledby="tab-contact" aria-hidden="true">
+      <div class="card" style="margin: 18px 0;">
+        <h3>Contact Zzone Academy</h3>
+        <form id="contact-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="c-name">Your Name</label>
+              <input id="c-name" required />
+            </div>
+            <div class="field">
+              <label for="c-email">Email</label>
+              <input id="c-email" type="text" inputmode="email" required />
+            </div>
+            <div class="field full">
+              <label for="c-msg">Message</label>
+              <textarea id="c-msg" rows="4" required placeholder="How can we help?"></textarea>
+            </div>
+            <div class="field full actions">
+              <button class="btn primary" type="submit">Send</button>
+              <button class="btn" type="reset">Clear</button>
+            </div>
+            <div class="note full">Demo only — this does not send email.</div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="year"></span> Zzone Academy — Front-end . Built with HTML • CSS • JS.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
